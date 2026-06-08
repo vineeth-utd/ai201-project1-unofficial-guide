@@ -41,7 +41,40 @@ def build_metadata(chunk):
     return meta
 
 
-def run():
+def build_collection(client, rebuild):
+    # client.list_collections() returns Collection objects; extract names to check existence.
+    existing_names = [c.name for c in client.list_collections()]
+    exists = COLLECTION_NAME in existing_names
+
+    if rebuild:
+        if exists:
+            # client.delete_collection() removes all vectors, metadata, and the
+            # collection entry from chroma.sqlite3 permanently.
+            client.delete_collection(COLLECTION_NAME)
+            print(f"Deleted existing collection '{COLLECTION_NAME}'.")
+        # client.create_collection() always creates a fresh, empty collection.
+        return client.create_collection(name=COLLECTION_NAME), True
+
+    if exists:
+        # client.get_collection() opens the collection without modifying it.
+        collection = client.get_collection(name=COLLECTION_NAME)
+        print(
+            f"Collection '{COLLECTION_NAME}' already exists with "
+            f"{collection.count()} records. Reusing it."
+        )
+        return collection, False
+
+    print(f"Collection '{COLLECTION_NAME}' not found. Creating it.")
+    return client.create_collection(name=COLLECTION_NAME), True
+
+
+def run(rebuild=False):
+    client = chromadb.PersistentClient(path=str(CHROMA_PATH))
+    collection, needs_insert = build_collection(client, rebuild)
+
+    if not needs_insert:
+        return
+
     chunks = load_chunks()
     print(f"Total chunks loaded: {len(chunks)}")
 
@@ -49,15 +82,6 @@ def run():
     texts = [chunk["text"] for chunk in chunks]
     embeddings = model.encode(texts, show_progress_bar=True, batch_size=64)
     print(f"Total embeddings generated: {len(embeddings)}")
-
-    client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-
-    # Delete existing collection to ensure a clean rebuild
-    existing = [c.name for c in client.list_collections()]
-    if COLLECTION_NAME in existing:
-        client.delete_collection(COLLECTION_NAME)
-
-    collection = client.create_collection(name=COLLECTION_NAME)
 
     ids = [f"chunk_{i}" for i in range(len(chunks))]
     metadatas = [build_metadata(c) for c in chunks]
@@ -88,4 +112,11 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Build the apartment_reviews ChromaDB collection.")
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Delete and recreate the collection, then regenerate all embeddings.",
+    )
+    args = parser.parse_args()
+    run(rebuild=args.rebuild)
