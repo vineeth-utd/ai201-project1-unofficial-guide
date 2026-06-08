@@ -39,21 +39,35 @@ Chunk output:
 
 ## Chunk Metadata
 
-Each chunk preserves metadata needed for retrieval and source attribution.
+Each chunk preserves metadata for retrieval, filtering, debugging, and source attribution.
 
-Metadata fields:
+**Metadata fields:**
 
 - source_platform
 - source_url
-- document_title
-- apartment_name (if available)
-- thread_title (if available)
-- author (if available)
-- rating (if available)
-- review_title (if available)
-- date or created timestamp (if available)
+- author
 - record_type
+- document_title
+- apartment_name
+- thread_title
+- rating
+- review_title
+- date
 - chunk_index
+
+Chunk text is stored separately in the `text` field.
+
+**Notes:**
+
+- ApartmentRatings chunks populate:
+  - apartment_name
+  - rating
+  - review_title
+
+- Reddit chunks populate:
+  - thread_title
+
+- Fields that do not apply to a source may be null.
 
 ## Retrieval
 
