@@ -12,6 +12,22 @@ KNOWN_PROPERTIES = [
     "Onnix",
     "Paseo on University",
     "Sentry Tempe",
+    "Park Place",
+    "Vertex",
+    "Olive",
+    "Union Tempe",
+    "Redpoint",
+    "Emerson",
+    "The Hyve",
+    "University House",
+    "Volta at Broadway",
+    "Alight",
+    "University Valley",
+    "University Pointe",
+    "Skye",
+    "Agave",
+    "Apollo",
+    "Canvas"
 ]
 # Subtracted from L2 distance for chunks that match the queried property.
 # Chosen to exceed the observed gap (~0.26) between on-property and off-property
