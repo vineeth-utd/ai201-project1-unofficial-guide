@@ -43,11 +43,14 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      numbers fit the structure of your documents.
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
-**Chunk size:**
+**Chunk size:** 500 characters
 
-**Overlap:**
+**Overlap:** 100 characters
 
 **Reasoning:**
+My documents contain a mix of ApartmentRatings reviews and Reddit discussions. Some reviews are only one or two sentences long, while others are several paragraphs and cover multiple topics such as safety, maintenance, management, and pricing.
+
+I plan to use a recursive chunking strategy so that shorter reviews and comments stay intact whenever possible. For longer reviews, the text will be split at natural boundaries such as paragraphs or sentences before falling back to character-based splitting. I chose a chunk size of 500 characters because it is usually large enough to keep a complete recommendation or complaint together, while still being small enough for accurate retrieval. I will use an overlap of 100 characters so that important details are less likely to be lost when a long review is split across multiple chunks.
 
 ---
 
@@ -59,11 +62,12 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      would you weigh in choosing a different embedding model — context length, multilingual
      support, accuracy on domain-specific text, latency? -->
 
-**Embedding model:**
+**Embedding model:** all-MiniLM-L6-v2 (sentence-transformers)
 
-**Top-k:**
+**Top-k:** 5
 
 **Production tradeoff reflection:**
+For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, and is fast enough for a small RAG system. I chose a top-k value of 5 because it should provide enough context from multiple reviews and discussions without introducing too much unrelated information. If I were deploying this system for real users and cost was not a constraint, I would consider larger embedding models that may provide better retrieval accuracy, especially for longer reviews and more complex housing-related queries. I would also consider latency, since larger models are often slower, and multilingual support if the system needed to handle reviews written in languages other than English. Since all of my current documents are in English, multilingual support is not a requirement for this project.
 
 ---
 
@@ -76,11 +80,11 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | Which apartment communities are most commonly recommended near ASU, and why? | IMT Desert Palm Village is frequently recommended because of responsive maintenance staff, helpful leasing staff, affordability, and positive resident experiences. Other recommendations include Park Place, Union, Oliv, Redpoint, The Regency, and Southbank Apartments for reasons such as location, amenities, management quality, or affordability. |
+| 2 | Why do multiple residents recommend avoiding Paseo on University? | Residents mention frequent water shutoffs, roach infestations, maintenance problems, plumbing issues, noisy neighbors, safety concerns, and poor communication from management. |
+| 3 | What positive experiences do residents mention about IMT Desert Palm Village? | Residents frequently praise the maintenance team for quick responses, helpful leasing staff, smooth move-in experiences, affordability, and friendly customer service. |
+| 4 | What complaints are mentioned about Onnix? | Residents report slow maintenance, pest problems, parking issues, water shutoffs, trash problems, high costs, and poor communication from management. |
+| 5 | What is the average rent for a one-bedroom apartment in downtown Phoenix? | The system should indicate that it does not have enough information because this topic is outside the scope of the collected documents. |
 
 ---
 
@@ -90,9 +94,10 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1. **Challenge 1: Conflicting Opinions** - Apartment reviews and Reddit discussions are highly subjective. One resident may describe an apartment as quiet and safe, while another may describe the same apartment as noisy and unsafe. This could make it difficult for the system to provide a clear answer when the retrieved chunks contain conflicting experiences from different residents.
 
-2.
+
+2. **Challenge 2: Long Reviews Cover Multiple Topics** - Many ApartmentRatings reviews discuss several topics in a single review, such as maintenance, safety, management, pricing, and amenities. If a long review is split into multiple chunks, important context could be separated across chunk boundaries, causing retrieval to return only part of a resident's experience and leading to incomplete answers.
 
 ---
 
@@ -103,6 +108,8 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      Label each stage with the tool or library you're using.
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
+
+![RAG Pipeline Architecture](assets/rag_pipeline_architecture.png)
 
 ---
 
@@ -120,6 +127,12 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 
 **Milestone 3 — Ingestion and chunking:**
 
+I plan to use Claude Code to help build the cleaning and chunking scripts. I will give it my Documents section, Chunking Strategy section, and the pipeline diagram so it knows what file types I have and how I want the text to be processed. I expect it to produce scripts that load the raw JSON/text files, clean the content, and split it into chunks using my chosen chunk size and overlap. I will verify the output by printing cleaned documents and a few sample chunks to make sure the text still reads naturally and that reviews/comments are not getting broken in awkward places.
+
 **Milestone 4 — Embedding and retrieval:**
 
+I plan to use Claude Code to implement the embedding and retrieval part of the pipeline. I will give it my Retrieval Approach section, Chunking Strategy section, and Architecture diagram so it can connect the cleaned chunks to the vector store correctly. I expect it to produce code that embeds the chunks with all-MiniLM-L6-v2, stores them in ChromaDB with source metadata, and returns the top-k most relevant chunks for a query. I will verify this by testing a few evaluation questions and checking whether the retrieved chunks are actually relevant and come from the right sources.
+
 **Milestone 5 — Generation and interface:**
+
+I plan to use Claude Code to wire retrieval into the LLM and build the query interface. I will give it my Retrieval Approach section, Anticipated Challenges, and Architecture diagram, along with my grounding requirement that answers must come only from retrieved context. I expect it to produce a working end-to-end query flow that retrieves chunks, sends them to the model, and returns an answer with source attribution. I will verify the output by asking questions that are clearly covered by the documents, checking that the response cites the correct sources, and also asking at least one out-of-scope question to make sure the system refuses instead of guessing.
