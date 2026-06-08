@@ -6,6 +6,18 @@ ROOT = Path(__file__).resolve().parents[2]
 CHROMA_PATH = ROOT / "documents" / "chroma_db"
 COLLECTION_NAME = "apartment_reviews"
 
+KNOWN_PROPERTIES = [
+    "IMT Desert Palm Village",
+    "Murietta at ASU",
+    "Onnix",
+    "Paseo on University",
+    "Sentry Tempe",
+]
+# Subtracted from L2 distance for chunks that match the queried property.
+# Chosen to exceed the observed gap (~0.26) between on-property and off-property
+# chunks so on-property results reliably rank above off-property ones.
+PROPERTY_BOOST = 0.3
+
 _model = None
 _collection = None
 
@@ -25,7 +37,7 @@ def _get_collection():
     return _collection
 
 
-def retrieve(query: str, k: int = 5) -> list:
+def _semantic_retrieve(query: str, k: int) -> list:
     embedding = _get_model().encode([query])
     results = _get_collection().query(
         query_embeddings=embedding.tolist(),
@@ -37,9 +49,49 @@ def retrieve(query: str, k: int = 5) -> list:
             "text": results["documents"][0][i],
             "metadata": results["metadatas"][0][i],
             "distance": results["distances"][0][i],
+            "boosted": False,
         }
         for i in range(len(results["documents"][0]))
     ]
+
+
+def _detect_property(query: str) -> str | None:
+    q = query.lower()
+    for name in KNOWN_PROPERTIES:
+        if name.lower() in q:
+            return name
+    return None
+
+
+def _property_matches(result: dict, property_name: str) -> bool:
+    meta = result["metadata"]
+    name_lower = property_name.lower()
+    if meta.get("source_platform") == "ApartmentRatings":
+        return meta.get("apartment_name", "").lower() == name_lower
+    # Reddit chunks have no apartment_name metadata; scan the text instead.
+    return name_lower in result["text"].lower()
+
+
+def retrieve(query: str, k: int = 5) -> list:
+    """Return top-k chunks for query. Applies property-aware reranking when the
+    query names a known apartment property."""
+    raw = _semantic_retrieve(query, k=10)
+
+    property_name = _detect_property(query)
+    if property_name is None:
+        return raw[:k]
+
+    for r in raw:
+        if _property_matches(r, property_name):
+            r["boosted"] = True
+            r["_sort_key"] = r["distance"] - PROPERTY_BOOST
+        else:
+            r["_sort_key"] = r["distance"]
+
+    reranked = sorted(raw, key=lambda r: r["_sort_key"])
+    for r in reranked:
+        del r["_sort_key"]
+    return reranked[:k]
 
 
 # ---------------------------------------------------------------------------
@@ -67,104 +119,68 @@ EVAL_QUESTIONS = [
     ),
 ]
 
-RELEVANCE_HINTS = {
-    "Q1": ["sentry", "management", "communication", "complaint", "maintenance", "response"],
-    "Q2": ["paseo", "water", "roach", "pest", "plumbing", "noise", "unsafe", "avoid"],
-    "Q3": ["imt", "desert palm", "maintenance", "leasing", "staff", "move-in", "friendly", "affordable"],
-}
 
-
-def _relevance_label(qid: str, text: str, metadata: dict) -> str:
-    hints = RELEVANCE_HINTS[qid]
-    combined = (text + " " + metadata.get("apartment_name", "") + " " + metadata.get("thread_title", "")).lower()
-    matches = [h for h in hints if h in combined]
-    if len(matches) >= 3:
-        return "RELEVANT"
-    if len(matches) >= 1:
-        return "PARTIALLY RELEVANT"
-    return "WEAK / OFF-TOPIC"
+def _source_label(result: dict) -> str:
+    meta = result["metadata"]
+    name = meta.get("apartment_name") or meta.get("document_title") or ""
+    platform = meta.get("source_platform", "")
+    return f"{platform} — {name}"
 
 
 def main():
     for qid, query, expected in EVAL_QUESTIONS:
         print("=" * 72)
         print(f"QUERY {qid}: {query}")
-        print(f"Expected answer: {expected}")
+        print(f"Expected: {expected}")
         print("=" * 72)
 
-        results = retrieve(query, k=5)
+        # --- Stage 1: top-10 semantic results ---
+        semantic_top10 = _semantic_retrieve(query, k=10)
+        detected = _detect_property(query)
 
-        for rank, r in enumerate(results, start=1):
+        print(f"\nDetected property: {detected!r}")
+        print(f"\nStage 1 — Top 10 semantic results:")
+        for i, r in enumerate(semantic_top10, 1):
+            boost_flag = ""
+            if detected and _property_matches(r, detected):
+                boost_flag = "  [WILL BOOST]"
+            print(f"  {i:2d}. dist={r['distance']:.4f}{boost_flag}  {_source_label(r)}")
+            print(f"      {r['text'][:100].replace(chr(10), ' ')}")
+
+        # --- Stage 2: reranked top-5 ---
+        final = retrieve(query, k=5)
+
+        # Determine before/after property match counts
+        prop_before = sum(
+            1 for r in semantic_top10[:5]
+            if detected and _property_matches(r, detected)
+        )
+        prop_after = sum(
+            1 for r in final
+            if detected and _property_matches(r, detected)
+        )
+
+        print(f"\nStage 2 — Final top 5 after reranking (property matches: {prop_before}/5 → {prop_after}/5):")
+        for rank, r in enumerate(final, 1):
+            boost_tag = " [BOOSTED]" if r["boosted"] else ""
             meta = r["metadata"]
-            label = _relevance_label(qid, r["text"], meta)
-            print(f"\n  Result {rank}  |  distance={r['distance']:.4f}  |  {label}")
-            print(f"  Source    : {meta.get('source_platform')} — {meta.get('apartment_name') or meta.get('thread_title') or meta.get('document_title')}")
+            print(f"\n  Result {rank}  |  dist={r['distance']:.4f}{boost_tag}")
+            print(f"  Source    : {_source_label(r)}")
             print(f"  Author    : {meta.get('author')}  |  Date: {meta.get('date')}  |  Rating: {meta.get('rating') or 'n/a'}")
-            print(f"  URL       : {meta.get('source_url')}")
             if meta.get("review_title"):
                 print(f"  Review    : {meta.get('review_title')}")
             print(f"  Chunk idx : {meta.get('chunk_index')}")
             print(f"  Text      :\n    {r['text']}")
 
+        # Per-query comparison commentary
         print()
-
-    # -------------------------------------------------------------------
-    # Retrieval analysis
-    # -------------------------------------------------------------------
-    print("=" * 72)
-    print("RETRIEVAL ANALYSIS")
-    print("=" * 72)
-
-    all_results = {qid: retrieve(query, k=5) for qid, query, _ in EVAL_QUESTIONS}
-
-    print("""
-Q1 — Management concerns at Sentry Tempe
-  Analysis: Chunks should reference Sentry Tempe residents describing management
-  failures. If top results are from Sentry Tempe reviews with distance < 0.5,
-  retrieval is working. Watch for Reddit chunks that mention Sentry generically
-  vs. ApartmentRatings reviews with specific complaints — both are useful.
-
-Q2 — Why avoid Paseo on University
-  Analysis: Paseo reviews are complaint-heavy, so distinctive keywords (water
-  shutoff, roach, plumbing) should produce tight semantic clusters. Results
-  from other apartments mentioning similar problems are partially relevant but
-  weaker — check whether apartment_name in metadata confirms the right property.
-
-Q3 — Positive experiences at IMT Desert Palm Village
-  Analysis: IMT reviews skew positive in the corpus. If retrieval surface these
-  correctly, distances should be the tightest of the three queries since the
-  query sentiment matches the review sentiment closely.
-
-Distance score summary:""")
-
-    for qid, query, _ in EVAL_QUESTIONS:
-        dists = [r["distance"] for r in all_results[qid]]
-        below_half = sum(1 for d in dists if d < 0.5)
-        print(f"  {qid}: min={min(dists):.4f}  max={max(dists):.4f}  "
-              f"median={sorted(dists)[2]:.4f}  below_0.5={below_half}/5")
-
-    print("""
-Top-k = 5 assessment:
-  For a corpus of 3213 chunks across 10 sources (5 apartment properties + 5
-  Reddit threads), k=5 provides enough diversity to cover multiple reviewers'
-  perspectives on the same property without overwhelming the LLM context in
-  Milestone 5. k=5 appears appropriate.
-
-Potential failure modes:
-  - Chunking: long reviews split at arbitrary boundaries may surface a chunk
-    that mentions a property name but lacks the specific complaint — the
-    surrounding chunks with the actual details are ranked lower.
-  - Embedding quality: all-MiniLM-L6-v2 is a general-purpose model not
-    fine-tuned on housing reviews. Highly specific terms (property names,
-    local slang) may not cluster as tightly as domain-adapted models would.
-  - Top-k: if a property has few reviews, k=5 may pull in off-topic chunks
-    from other apartments to fill the result set.
-
-Milestone 5 readiness:
-  If Q1/Q2/Q3 each return at least 3 of 5 results from the correct property
-  with distances below 0.5, retrieval quality is sufficient to proceed. The
-  LLM generation step can discard weakly relevant chunks by grounding answers
-  strictly in the retrieved text.""")
+        if prop_after > prop_before:
+            print(f"  >> Improvement: {prop_before}/5 → {prop_after}/5 on-property chunks in final results.")
+        elif prop_after == prop_before:
+            print(f"  >> No change in on-property count ({prop_before}/5). Reranking did not alter top-5 for this query.")
+        else:
+            print(f"  >> Regression: {prop_before}/5 → {prop_after}/5. Check PROPERTY_BOOST value.")
+        print()
 
 
 if __name__ == "__main__":
