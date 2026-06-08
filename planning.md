@@ -43,11 +43,14 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      numbers fit the structure of your documents.
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
-**Chunk size:**
+**Chunk size:** 500 characters
 
-**Overlap:**
+**Overlap:** 100 characters
 
 **Reasoning:**
+My documents contain a mix of ApartmentRatings reviews and Reddit discussions. Some reviews are only one or two sentences long, while others are several paragraphs and cover multiple topics such as safety, maintenance, management, and pricing.
+
+I plan to use a recursive chunking strategy so that shorter reviews and comments stay intact whenever possible. For longer reviews, the text will be split at natural boundaries such as paragraphs or sentences before falling back to character-based splitting. I chose a chunk size of 500 characters because it is usually large enough to keep a complete recommendation or complaint together, while still being small enough for accurate retrieval. I will use an overlap of 100 characters so that important details are less likely to be lost when a long review is split across multiple chunks.
 
 ---
 
@@ -59,11 +62,12 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      would you weigh in choosing a different embedding model — context length, multilingual
      support, accuracy on domain-specific text, latency? -->
 
-**Embedding model:**
+**Embedding model:** all-MiniLM-L6-v2 (sentence-transformers)
 
-**Top-k:**
+**Top-k:** 5
 
 **Production tradeoff reflection:**
+For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, and is fast enough for a small RAG system. I chose a top-k value of 5 because it should provide enough context from multiple reviews and discussions without introducing too much unrelated information. If I were deploying this system for real users and cost was not a constraint, I would consider larger embedding models that may provide better retrieval accuracy, especially for longer reviews and more complex housing-related queries. I would also consider latency, since larger models are often slower, and multilingual support if the system needed to handle reviews written in languages other than English. Since all of my current documents are in English, multilingual support is not a requirement for this project.
 
 ---
 
