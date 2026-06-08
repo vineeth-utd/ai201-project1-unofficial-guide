@@ -50,7 +50,7 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 **Reasoning:**
 My documents contain a mix of ApartmentRatings reviews and Reddit discussions. Some reviews are only one or two sentences long, while others are several paragraphs and cover multiple topics such as safety, maintenance, management, and pricing.
 
-I plan to use a recursive chunking strategy so that shorter reviews and comments stay intact whenever possible. For longer reviews, the text will be split at natural boundaries such as paragraphs or sentences before falling back to character-based splitting. I chose a chunk size of 500 characters because it is usually large enough to keep a complete recommendation or complaint together, while still being small enough for accurate retrieval. I will use an overlap of 100 characters so that important details are less likely to be lost when a long review is split across multiple chunks.
+I plan to use a recursive chunking strategy so that shorter reviews and comments stay intact whenever possible. Short reviews and comments will remain as a single chunk whenever possible, while longer reviews will be split at natural boundaries such as paragraphs or sentences before falling back to character-based splitting. I chose a chunk size of 500 characters because it is usually large enough to keep a complete recommendation or complaint together, while still being small enough for accurate retrieval. I will use an overlap of 100 characters so that important details are less likely to be lost when a long review is split across multiple chunks.
 
 ---
 
@@ -80,11 +80,11 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | Which apartment communities are most commonly recommended near ASU, and why? | IMT Desert Palm Village is frequently recommended because of responsive maintenance staff, helpful leasing staff, affordability, and positive resident experiences. Other recommendations include Park Place, Union, Oliv, Redpoint, The Regency, and Southbank Apartments for reasons such as location, amenities, management quality, or affordability. |
+| 1 | What concerns do residents raise about management at Sentry Tempe? | Residents describe poor communication, ignored complaints, slow responses, unresolved maintenance requests, and a lack of urgency in addressing resident concerns. |
 | 2 | Why do multiple residents recommend avoiding Paseo on University? | Residents mention frequent water shutoffs, roach infestations, maintenance problems, plumbing issues, noisy neighbors, safety concerns, and poor communication from management. |
 | 3 | What positive experiences do residents mention about IMT Desert Palm Village? | Residents frequently praise the maintenance team for quick responses, helpful leasing staff, smooth move-in experiences, affordability, and friendly customer service. |
 | 4 | What complaints are mentioned about Onnix? | Residents report slow maintenance, pest problems, parking issues, water shutoffs, trash problems, high costs, and poor communication from management. |
-| 5 | What is the average rent for a one-bedroom apartment in downtown Phoenix? | The system should indicate that it does not have enough information because this topic is outside the scope of the collected documents. |
+| 5 | What is the average rent for a one-bedroom apartment in downtown Phoenix? | The system should indicate that it does not have enough information because the collected documents focus on apartment reviews and housing experiences near ASU Tempe, not rental market statistics for downtown Phoenix. |
 
 ---
 
@@ -110,6 +110,15 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
 ![RAG Pipeline Architecture](assets/rag_pipeline_architecture.png)
+
+**Metadata stored with each chunk:**
+- source_platform
+- document_title
+- source_url
+- apartment_name (optional)
+- chunk_index
+- record_type
+- rating (optional)
 
 ---
 
