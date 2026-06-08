@@ -9,7 +9,8 @@ Read planning.md first. It is the source of truth for the project design.
 - documents/raw/apartmentratings/ -> raw ApartmentRatings JSON
 - documents/cleaned/reddit/ -> cleaned Reddit text files
 - documents/cleaned/apartmentratings/ -> cleaned ApartmentRatings text files
-- src/ingestion/ -> ingestion and normalization code
+- documents/chunks.json -> chunked corpus with metadata
+- src/ingestion/ -> ingestion, normalization, and chunking code
 
 ## Source rules
 
@@ -24,10 +25,35 @@ Read planning.md first. It is the source of truth for the project design.
 
 ## Chunking
 
+Implemented and validated.
+
 - Recursive chunking
 - Chunk size: 500 characters
 - Overlap: 100 characters
+- Paragraph → sentence → character fallback
 - Keep short reviews/comments intact whenever possible
+- Split long reviews at natural boundaries before character splitting
+
+Chunk output:
+- documents/chunks.json
+
+## Chunk Metadata
+
+Each chunk preserves metadata needed for retrieval and source attribution.
+
+Metadata fields:
+
+- source_platform
+- source_url
+- document_title
+- apartment_name (if available)
+- thread_title (if available)
+- author (if available)
+- rating (if available)
+- review_title (if available)
+- date or created timestamp (if available)
+- record_type
+- chunk_index
 
 ## Retrieval
 
