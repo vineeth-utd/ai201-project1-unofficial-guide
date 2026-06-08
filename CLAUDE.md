@@ -5,12 +5,25 @@ Read planning.md first. It is the source of truth for the project design.
 ## Repo structure
 
 - assets/ -> architecture diagram
+
 - documents/raw/reddit/ -> raw Reddit JSON
 - documents/raw/apartmentratings/ -> raw ApartmentRatings JSON
+
 - documents/cleaned/reddit/ -> cleaned Reddit text files
 - documents/cleaned/apartmentratings/ -> cleaned ApartmentRatings text files
+
 - documents/chunks.json -> chunked corpus with metadata
+
+- documents/chroma_db/ -> persistent ChromaDB vector store
+
 - src/ingestion/ -> ingestion, normalization, and chunking code
+  - reddit_extractor.py -> Reddit-specific extraction and normalization
+  - apartmentratings_extractor.py -> ApartmentRatings extraction and normalization
+  - pipeline.py -> ingestion and cleaning pipeline
+  - chunker.py -> recursive chunking pipeline
+
+- src/embedding/ -> embedding and vector store code
+  - vectorstore.py -> embedding generation and ChromaDB storage
 
 ## Source rules
 
@@ -69,11 +82,57 @@ Chunk text is stored separately in the `text` field.
 
 - Fields that do not apply to a source may be null.
 
+## Embeddings
+
+Implemented and validated.
+
+- Embedding model: all-MiniLM-L6-v2
+- Chunk source: documents/chunks.json
+- Vector store: ChromaDB
+- Persistent storage: documents/chroma_db/
+
+Only the chunk text field is embedded.
+
+Chunk metadata is stored separately in ChromaDB for retrieval and source attribution.
+
+## ChromaDB Management
+
+**Default behavior:**
+
+```bash
+python3 src/embedding/vectorstore.py
+```
+
+- Reuses the existing ChromaDB collection if it already exists.
+
+**Rebuild behavior:**
+
+```bash
+python3 src/embedding/vectorstore.py --rebuild
+```
+
+- Deletes the existing collection.
+- Regenerates embeddings from documents/chunks.json.
+- Recreates the ChromaDB collection from scratch.
+
 ## Retrieval
+
+Implemented and validated.
 
 - Embedding model: all-MiniLM-L6-v2
 - Vector store: ChromaDB
-- top-k: 5
+- Final top-k: 5
+
+Retrieval process:
+
+1. Retrieve the top 10 semantic matches from ChromaDB.
+2. Detect whether the query explicitly mentions an apartment property.
+3. Apply property-aware reranking:
+   - ApartmentRatings chunks are boosted when apartment_name matches.
+   - Reddit chunks are boosted when the apartment name appears in the chunk text.
+4. Return the final top 5 results.
+
+Property-aware reranking is only applied when the query explicitly mentions an apartment property. Otherwise, retrieval uses pure semantic search.
 
 ## Generation
 
