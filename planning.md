@@ -80,11 +80,11 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | Which apartment communities are most commonly recommended near ASU, and why? | IMT Desert Palm Village is frequently recommended because of responsive maintenance staff, helpful leasing staff, affordability, and positive resident experiences. Other recommendations include Park Place, Union, Oliv, Redpoint, The Regency, and Southbank Apartments for reasons such as location, amenities, management quality, or affordability. |
+| 2 | Why do multiple residents recommend avoiding Paseo on University? | Residents mention frequent water shutoffs, roach infestations, maintenance problems, plumbing issues, noisy neighbors, safety concerns, and poor communication from management. |
+| 3 | What positive experiences do residents mention about IMT Desert Palm Village? | Residents frequently praise the maintenance team for quick responses, helpful leasing staff, smooth move-in experiences, affordability, and friendly customer service. |
+| 4 | What complaints are mentioned about Onnix? | Residents report slow maintenance, pest problems, parking issues, water shutoffs, trash problems, high costs, and poor communication from management. |
+| 5 | What is the average rent for a one-bedroom apartment in downtown Phoenix? | The system should indicate that it does not have enough information because this topic is outside the scope of the collected documents. |
 
 ---
 
@@ -94,9 +94,10 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1. **Challenge 1: Conflicting Opinions** - Apartment reviews and Reddit discussions are highly subjective. One resident may describe an apartment as quiet and safe, while another may describe the same apartment as noisy and unsafe. This could make it difficult for the system to provide a clear answer when the retrieved chunks contain conflicting experiences from different residents.
 
-2.
+
+2. **Challenge 2: Long Reviews Cover Multiple Topics** - Many ApartmentRatings reviews discuss several topics in a single review, such as maintenance, safety, management, pricing, and amenities. If a long review is split into multiple chunks, important context could be separated across chunk boundaries, causing retrieval to return only part of a resident's experience and leading to incomplete answers.
 
 ---
 
@@ -124,6 +125,12 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 
 **Milestone 3 — Ingestion and chunking:**
 
+I plan to use Claude Code to help build the cleaning and chunking scripts. I will give it my Documents section, Chunking Strategy section, and the pipeline diagram so it knows what file types I have and how I want the text to be processed. I expect it to produce scripts that load the raw JSON/text files, clean the content, and split it into chunks using my chosen chunk size and overlap. I will verify the output by printing cleaned documents and a few sample chunks to make sure the text still reads naturally and that reviews/comments are not getting broken in awkward places.
+
 **Milestone 4 — Embedding and retrieval:**
 
+I plan to use Claude Code to implement the embedding and retrieval part of the pipeline. I will give it my Retrieval Approach section, Chunking Strategy section, and Architecture diagram so it can connect the cleaned chunks to the vector store correctly. I expect it to produce code that embeds the chunks with all-MiniLM-L6-v2, stores them in ChromaDB with source metadata, and returns the top-k most relevant chunks for a query. I will verify this by testing a few evaluation questions and checking whether the retrieved chunks are actually relevant and come from the right sources.
+
 **Milestone 5 — Generation and interface:**
+
+I plan to use Claude Code to wire retrieval into the LLM and build the query interface. I will give it my Retrieval Approach section, Anticipated Challenges, and Architecture diagram, along with my grounding requirement that answers must come only from retrieved context. I expect it to produce a working end-to-end query flow that retrieves chunks, sends them to the model, and returns an answer with source attribution. I will verify the output by asking questions that are clearly covered by the documents, checking that the response cites the correct sources, and also asking at least one out-of-scope question to make sure the system refuses instead of guessing.
