@@ -66,6 +66,9 @@ I plan to use a recursive chunking strategy so that shorter reviews and comments
 
 **Top-k:** 5
 
+**Implementation note:**
+During implementation, I found that apartment-specific queries sometimes retrieved reviews from other apartment communities because management, maintenance, and safety complaints use similar language across many properties. To improve retrieval quality, I implemented a two-stage retrieval process. The system first retrieves the top 10 semantic matches from ChromaDB, then applies property-aware reranking when the query explicitly mentions an apartment name. Chunks from the matching apartment are prioritized, while semantic retrieval remains unchanged for broader queries. The final system still returns the top 5 results.
+
 **Production tradeoff reflection:**
 For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, and is fast enough for a small RAG system. I chose a top-k value of 5 because it should provide enough context from multiple reviews and discussions without introducing too much unrelated information. If I were deploying this system for real users and cost was not a constraint, I would consider larger embedding models that may provide better retrieval accuracy, especially for longer reviews and more complex housing-related queries. I would also consider latency, since larger models are often slower, and multilingual support if the system needed to handle reviews written in languages other than English. Since all of my current documents are in English, multilingual support is not a requirement for this project.
 
