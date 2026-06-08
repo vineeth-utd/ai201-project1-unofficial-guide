@@ -109,6 +109,8 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
+![RAG Pipeline Architecture](assets/rag_pipeline_architecture.png)
+
 ---
 
 ## AI Tool Plan
