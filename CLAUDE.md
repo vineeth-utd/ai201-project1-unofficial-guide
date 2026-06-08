@@ -117,9 +117,22 @@ python3 src/embedding/vectorstore.py --rebuild
 
 ## Retrieval
 
+Implemented and validated.
+
 - Embedding model: all-MiniLM-L6-v2
 - Vector store: ChromaDB
-- top-k: 5
+- Final top-k: 5
+
+Retrieval process:
+
+1. Retrieve the top 10 semantic matches from ChromaDB.
+2. Detect whether the query explicitly mentions an apartment property.
+3. Apply property-aware reranking:
+   - ApartmentRatings chunks are boosted when apartment_name matches.
+   - Reddit chunks are boosted when the apartment name appears in the chunk text.
+4. Return the final top 5 results.
+
+Property-aware reranking is only applied when the query explicitly mentions an apartment property. Otherwise, retrieval uses pure semantic search.
 
 ## Generation
 
