@@ -28,16 +28,16 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 
 | # | Source | Type | URL or file path |
 |---|--------|------|-----------------|
-| 1 | IMT Desert Palm Village Reviews | ApartmentRatings reviews discussing resident experiences, management quality, maintenance, safety, and amenities. | https://www.apartmentratings.com/az/tempe/imt-desert-palm-village_480968109985281/#ratingsReviews  |
-| 2 | Murietta at ASU Reviews | ApartmentRatings reviews covering maintenance issues, safety concerns, management interactions, and overall resident satisfaction. | https://www.apartmentratings.com/az/tempe/murietta-at-asu_85281/#ratingsReviews |
-| 3 | Paseo on University Reviews | ApartmentRatings reviews describing apartment conditions, noise levels, management responsiveness, and resident experiences. | https://www.apartmentratings.com/az/tempe/paseo-on-university_4809688118852818420/#ratingsReviews |
-| 4 | Onnix Reviews | ApartmentRatings reviews discussing amenities, maintenance quality, leasing experiences, and resident feedback. | https://www.apartmentratings.com/az/tempe/onnix_9199332346275174870/#ratingsReviews |
-| 5 | Sentry Tempe Reviews | ApartmentRatings reviews highlighting safety, maintenance, management, pricing, and overall housing experiences. | https://www.apartmentratings.com/az/tempe/sentry-tempe_4808942261852824945/ |
-| 6 | Apartments to Avoid | Reddit discussion where ASU students share apartments they recommend avoiding and explain common issues. | https://www.reddit.com/r/ASU/comments/13vclht/apartments_to_avoid/ |
-| 7 | What Apartments Are Good in Tempe Near ASU? | Reddit discussion containing apartment recommendations and comparisons from current and former students. | https://www.reddit.com/r/ASU/comments/1np68lm/what_apartments_are_good_in_tempe_near_asu/ |
-| 8 | Cheap Apartments Near ASU Tempe Recommendations | Reddit discussion focused on affordable housing options, pricing, and value for money near campus. | https://www.reddit.com/r/ASU/comments/1d6osqa/cheap_apartments_near_asu_tempe_recommendations/ |
-| 9 | Apartments Near ASU | Reddit discussion covering general housing recommendations, apartment experiences, and location considerations. | https://www.reddit.com/r/ASU/comments/11efwke/apartments_near_asu/ |
-| 10 | Off-Campus Apartments | Reddit discussion about off-campus housing options, apartment comparisons, and student experiences living near ASU. | https://www.reddit.com/r/ASU/comments/y6pbzt/offcampus_apartments/ |
+| 1 | IMT Desert Palm Village Reviews | ApartmentRatings review page | https://www.apartmentratings.com/az/tempe/imt-desert-palm-village_480968109985281/#ratingsReviews  |
+| 2 | Murietta at ASU Reviews | ApartmentRatings review page | https://www.apartmentratings.com/az/tempe/murietta-at-asu_85281/#ratingsReviews |
+| 3 | Paseo on University Reviews | ApartmentRatings review page | https://www.apartmentratings.com/az/tempe/paseo-on-university_4809688118852818420/#ratingsReviews |
+| 4 | Onnix Reviews | ApartmentRatings review page | https://www.apartmentratings.com/az/tempe/onnix_9199332346275174870/#ratingsReviews |
+| 5 | Sentry Tempe Reviews | ApartmentRatings review page | https://www.apartmentratings.com/az/tempe/sentry-tempe_4808942261852824945/ |
+| 6 | Apartments to Avoid | Reddit discussion thread (r/ASU) | https://www.reddit.com/r/ASU/comments/13vclht/apartments_to_avoid/ |
+| 7 | What Apartments Are Good in Tempe Near ASU? | Reddit discussion thread (r/ASU) | https://www.reddit.com/r/ASU/comments/1np68lm/what_apartments_are_good_in_tempe_near_asu/ |
+| 8 | Cheap Apartments Near ASU Tempe Recommendations | Reddit discussion thread (r/ASU) | https://www.reddit.com/r/ASU/comments/1d6osqa/cheap_apartments_near_asu_tempe_recommendations/ |
+| 9 | Apartments Near ASU | Reddit discussion thread (r/ASU) | https://www.reddit.com/r/ASU/comments/11efwke/apartments_near_asu/ |
+| 10 | Off-Campus Apartments | Reddit discussion thread (r/ASU) | https://www.reddit.com/r/ASU/comments/y6pbzt/offcampus_apartments/ |
 
 ---
 
