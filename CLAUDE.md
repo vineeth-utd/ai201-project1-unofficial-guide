@@ -24,6 +24,10 @@ Read planning.md first. It is the source of truth for the project design.
 
 - src/embedding/ -> embedding and vector store code
   - vectorstore.py -> embedding generation and ChromaDB storage
+  - retriever.py -> semantic retrieval and property-aware reranking
+
+- src/generation/ -> grounded answer generation
+  - generator.py -> retrieval-to-LLM generation pipeline
 
 ## Source rules
 
@@ -136,10 +140,15 @@ Property-aware reranking is only applied when the query explicitly mentions an a
 
 ## Generation
 
-- Use Groq llama-3.3-70b-versatile
-- Answer only from retrieved context
-- Include source attribution
-- Refuse out-of-scope questions
+Implemented and validated.
+
+- LLM: Groq llama-3.3-70b-versatile
+- Answers must be grounded only in retrieved context.
+- Do not use external knowledge when retrieved context is insufficient.
+- If retrieved context does not contain enough information, respond:
+  "I don't have enough information on that."
+
+Source attribution is added programmatically using retrieved metadata rather than relying on the LLM to generate citations.
 
 ## Development notes
 
