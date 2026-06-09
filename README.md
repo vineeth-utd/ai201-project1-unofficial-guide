@@ -90,11 +90,11 @@ Additionally, models with stronger multilingual support would become more valuab
 
 ## Retrieval Strategy
 
-The system uses ChromaDB as its vector store and all-MiniLM-L6-v2 embeddings for semantic retrieval. For each query, the system first retrieves the top 10 semantic matches from ChromaDB.
+The system uses **ChromaDB** as its vector store and **all-MiniLM-L6-v2** embeddings for semantic retrieval. For each query, the system first retrieves the top 10 semantic matches from ChromaDB.
 
-During evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints often use very similar language. To improve retrieval quality, I implemented a property-aware reranking step. When a query explicitly mentions an apartment name, chunks associated with that apartment are boosted before the final results are returned.
+During evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints often use very similar language. To improve retrieval quality, I implemented a property-aware reranking step. When a query explicitly mentions an apartment name, ApartmentRatings chunks associated with that apartment are boosted using metadata, while Reddit chunks are boosted when the apartment name appears in the retrieved text. This helps prioritize apartment-specific evidence while preserving the benefits of semantic retrieval.
 
-The final retrieval stage returns the top 5 chunks, which are then passed to the generation pipeline.
+The final retrieval stage returns the **top 5** chunks, which are then passed to the generation pipeline.
 
 ---
 
