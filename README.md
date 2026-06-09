@@ -50,13 +50,26 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      - Any preprocessing you did before chunking (e.g., stripping HTML, removing headers)
      - What your final chunk count was across all documents -->
 
-**Chunk size:**
+**Preprocessing before chunking:**
+The raw data collected from Reddit and ApartmentRatings was first stored as JSON files in the `documents/raw` directory. A cleaning pipeline then extracted the actual review and discussion content along with relevant metadata such as apartment name, thread title, author, rating, date, and source URL. The cleaned output was stored as structured text files in the `documents/cleaned` directory, where each review or Reddit comment was represented as a readable review block. The chunking pipeline operates on these cleaned text files rather than the raw JSON data.
 
-**Overlap:**
+**Chunking approach:**
+A recursive chunking strategy was used. The splitter first attempts to preserve natural semantic boundaries by splitting at paragraph breaks. If a section is still too large, it falls back to sentence boundaries, and only then uses character-based splitting as a last resort. This approach helps keep complete thoughts, recommendations, and complaints together whenever possible. Short Reddit comments and shorter apartment reviews typically remain intact as a single chunk, while longer reviews are divided only when necessary.
+
+**Chunk size:** 500 characters
+
+**Overlap:** 100 characters
 
 **Why these choices fit your documents:**
+The corpus consists primarily of apartment reviews and Reddit discussions. Many Reddit comments are short and self-contained, while ApartmentRatings reviews can span multiple paragraphs and discuss several topics such as maintenance, management, safety, amenities, pricing, and move-in experiences.
 
-**Final chunk count:**
+A chunk size of 500 characters was chosen because it is usually large enough to preserve a complete recommendation, complaint, or resident experience within a single chunk while still being small enough to support precise retrieval. Larger chunks would risk combining multiple unrelated topics into a single embedding, while smaller chunks could fragment reviews and lose important context.
+
+A 100-character overlap was configured to preserve continuity when longer reviews had to be split. In practice, many Reddit comments and shorter apartment reviews remained as single chunks and therefore did not require overlap. For longer reviews, paragraph-level splits generally did not require overlap because each paragraph often represented a separate observation or topic. When a paragraph was still too large and needed to be split at sentence boundaries, overlap was used to preserve context between adjacent chunks.
+
+Using paragraph-first recursive splitting was particularly important for this dataset because apartment reviews often contain multiple independent observations in separate paragraphs. Preserving those boundaries helps retrieval return focused evidence rather than large mixed-topic chunks.
+
+**Final chunk count:** 3,213 chunks across all 10 source documents.
 
 ---
 
