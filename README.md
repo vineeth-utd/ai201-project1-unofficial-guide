@@ -176,8 +176,10 @@ I would improve retrieval by combining semantic search with stronger apartment-s
      Answer both questions with at least 2–3 sentences each. -->
 
 **One way the spec helped you during implementation:**
+The planning document served as a useful blueprint throughout development. Defining the document sources, chunking strategy, retrieval approach, evaluation questions, and architecture before writing code made it much easier to build the system incrementally. Because each stage of the pipeline was planned in advance, the implementation of one milestone naturally prepared the inputs required for the next milestone. The planning document also provided valuable context when working with AI coding tools, since I could share the relevant sections of the spec and architecture diagram to help the tool understand not only the current task but also how that component fit into the overall system design. This resulted in more accurate code generation and reduced the amount of rework needed later in the project.
 
 **One way your implementation diverged from the spec, and why:**
+The original retrieval approach in the spec assumed a straightforward semantic retrieval pipeline that returned the top-k results from ChromaDB. During implementation and evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across properties. To improve retrieval quality, I introduced a property-aware reranking step that first retrieves the top 10 semantic matches and then boosts chunks associated with the apartment mentioned in the query before returning the final top 5 results. This change was made based on evaluation results and improved retrieval precision for apartment-specific questions.
 
 ---
 
@@ -194,12 +196,28 @@ I would improve retrieval by combining semantic search with stronger apartment-s
 
 **Instance 1**
 
-- *What I gave the AI:*
+- *What I gave the AI:* 
+  I provided Claude Code with the relevant sections of `planning.md`, including the document sources, chunking strategy, retrieval approach, and architecture diagram. I used Claude in Plan Mode with Thinking enabled and asked it to first generate an implementation plan before making any code changes.
+
 - *What it produced:*
+  Claude produced a detailed implementation plan and then generated the core pipeline components, including the ingestion and cleaning pipeline, recursive chunking logic, embedding and ChromaDB storage pipeline, retrieval pipeline, grounded generation pipeline, and Gradio interface. It also generated validation scripts that were used to inspect chunk quality, evaluate retrieval behavior, and test grounded generation.
+
 - *What I changed or overrode:*
+  I reviewed the generated plans before allowing implementation and adjusted several design decisions. Rather than generating the entire system at once, I built the project incrementally, validating each pipeline stage before moving to the next. I also reviewed and understood the generated code before running or committing it, rather than accepting it directly. This included inspecting cleaned documents before chunking, reviewing chunk quality before generating embeddings, evaluating retrieval results before implementing generation, and analyzing retrieval failures before introducing property-aware reranking.
+
+  I chose to keep short reviews and Reddit comments as single chunks whenever possible, retained the 500-character chunk size and 100-character overlap after validating chunk quality, and later introduced property-aware reranking when evaluation showed that apartment-specific queries were retrieving reviews from other apartment communities.
 
 **Instance 2**
 
 - *What I gave the AI:*
+  I used ChatGPT throughout the project to brainstorm ideas, review implementation decisions, and understand specific concepts and APIs. I discussed topics such as chunking tradeoffs, overlap behavior, retrieval evaluation, ChromaDB APIs, source attribution strategies, and grounded generation techniques.
+
+  For example, I used ChatGPT to better understand how overlap behaved in my recursive chunking implementation, how ChromaDB collections and retrieval APIs worked, and to review retrieval results when evaluating the Sentry Tempe management query.
+
+
 - *What it produced:*
+  ChatGPT provided explanations of technical concepts, feedback on implementation choices, and suggestions for interpreting retrieval and evaluation results. It also helped me reason about why certain retrieval failures were occurring and explained the tradeoffs of different approaches such as changing chunk sizes, metadata filtering, and retrieval reranking.
+
+
 - *What I changed or overrode:*
+  I used the explanations and feedback to validate my own decisions rather than accepting suggestions directly. For example, after reviewing the retrieval results for the Sentry Tempe query, I decided not to change the chunk size or overlap because the issue was caused by semantically similar apartment reviews rather than chunk fragmentation. I also selectively adopted improvements such as property-aware reranking and refined source attribution only after evaluating how they affected the behavior of the system.
