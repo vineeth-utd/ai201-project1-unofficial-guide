@@ -46,6 +46,8 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 **Preprocessing before chunking:**
 The raw data collected from Reddit and ApartmentRatings was first stored as JSON files in the `documents/raw` directory. A cleaning pipeline then extracted the actual review and discussion content along with relevant metadata such as apartment name, thread title, author, rating, date, and source URL. The cleaned output was stored as structured text files in the `documents/cleaned` directory, where each review or Reddit comment was represented as a readable review block. The chunking pipeline operates on these cleaned text files rather than the raw JSON data.
 
+The cleaned review blocks were stored together with metadata such as *source platform*, *apartment name* or *discussion title*, *source URL*, *author*, *date*, *rating* (when available), and *chunk position*. This metadata was preserved throughout the pipeline for retrieval and source attribution.
+
 **Chunking approach:**
 A recursive chunking strategy was used. The splitter first attempts to preserve natural semantic boundaries by splitting at paragraph breaks. If a section is still too large, it falls back to sentence boundaries, and only then uses character-based splitting as a last resort. This approach helps keep complete thoughts, recommendations, and complaints together whenever possible. Short Reddit comments and shorter apartment reviews typically remain intact as a single chunk, while longer reviews are divided only when necessary.
 
