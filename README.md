@@ -82,8 +82,14 @@ Using paragraph-first recursive splitting was particularly important for this da
      latency, and local vs. API-hosted. -->
 
 **Model used:**
+I used `all-MiniLM-L6-v2` from the Sentence Transformers library. This model was chosen because it is free, runs locally, has no API costs or rate limits, and provides good semantic retrieval performance for short to medium-length text. Since the corpus consists primarily of apartment reviews and Reddit discussions written in English, all-MiniLM-L6-v2 provided a good balance between retrieval quality, speed, and simplicity. Its small size also made it practical to embed all 3,213 chunks locally without requiring specialized hardware.
 
 **Production tradeoff reflection:**
+For this project, `all-MiniLM-L6-v2` worked well because the corpus is relatively small and all documents are written in English. It provided fast embedding generation and retrieval while running entirely locally. 
+
+If I were deploying the system for real users and cost was not a concern, I would experiment with larger embedding models that may better distinguish between apartment reviews that use very similar language. Many reviews in this dataset discuss common topics such as maintenance, management, safety, and noise, which can make different apartment communities appear semantically similar. A stronger embedding model could potentially improve retrieval precision for those cases. I would also weigh the tradeoff between retrieval quality and latency, since larger models generally require more computation and increase response times. 
+
+Additionally, models with stronger multilingual support would become more valuable if the system expanded beyond English-language reviews, and models that support longer context windows could be useful if future documents contained longer discussions or forum threads.
 
 ---
 
