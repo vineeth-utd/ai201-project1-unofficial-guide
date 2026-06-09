@@ -95,13 +95,15 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      Be honest — a partially accurate or inaccurate result that you explain well is more
      valuable than a suspiciously perfect result. -->
 
+The table below summarizes the system's responses. Full responses were reviewed during evaluation and are available through the application interface.
+
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | What concerns do residents raise about management at Sentry Tempe? | Residents describe poor communication, ignored complaints, slow responses, unresolved maintenance requests, and a lack of urgency in addressing resident concerns. | The system identified complaints about management disregarding resident safety, rude maintenance staff, eviction threats, plumbing issues, and unresolved air conditioning problems. | Partially relevant | Partially accurate |
+| 2 | Why do multiple residents recommend avoiding Paseo on University? | Residents mention frequent water shutoffs, roach infestations, maintenance problems, plumbing issues, noisy neighbors, safety concerns, and poor communication from management. | The system highlighted roach infestations, frequent water and plumbing issues, safety concerns, harassment, and lack of security. | Relevant | Partially accurate |
+| 3 | What positive experiences do residents mention about IMT Desert Palm Village? | Residents frequently praise the maintenance team for quick responses, helpful leasing staff, smooth move-in experiences, affordability, and friendly customer service. | The system emphasized the property's atmosphere, amenities, responsive staff, helpful leasing office employees, and convenient location. | Relevant | Partially accurate |
+| 4 | What complaints are mentioned about Onnix? | Residents report slow maintenance, pest problems, parking issues, water shutoffs, trash problems, high costs, and poor communication from management. | The system identified plumbing problems, laundry room issues, pest infestations, maintenance problems, frequent water shutoffs, and poor management practices. | Relevant | Accurate |
+| 5 | What is the average rent for a one-bedroom apartment in downtown Phoenix? | The system should indicate that it does not have enough information because the collected documents focus on apartment reviews and housing experiences near ASU Tempe, not rental market statistics for downtown Phoenix. | The system correctly refused to answer and stated that it did not have enough information. | Off-target | Accurate |
 
 **Retrieval quality:** Relevant / Partially relevant / Off-target  
 **Response accuracy:** Accurate / Partially accurate / Inaccurate
@@ -122,12 +124,18 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      results from an unrelated review" is an explanation. -->
 
 **Question that failed:**
+What concerns do residents raise about management at Sentry Tempe?
 
 **What the system returned:**
+The system identified concerns such as rude maintenance staff, unresolved plumbing and air conditioning issues, management disregarding resident safety, and eviction threats. While these concerns were grounded in retrieved reviews, the answer did not fully capture other recurring themes such as poor communication, ignored complaints, slow responses, and lack of urgency from management.
 
 **Root cause (tied to a specific pipeline stage):**
+This failure originated in the retrieval stage. The embedding model (all-MiniLM-L6-v2) retrieved reviews from other apartment communities because management and maintenance complaints use similar language across many apartment complexes. Although property-aware reranking improved retrieval quality, only a small number of Sentry Tempe reviews appeared in the top semantic retrieval results. As a result, the generation step received incomplete Sentry-specific evidence and produced a partially accurate answer.
+
+This failure originated in the retrieval stage. The embedding model (all-MiniLM-L6-v2) retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across many apartment complexes. Although property-aware reranking improved retrieval quality, only 2 Sentry Tempe chunks appeared in the top 10 semantic retrieval results. Most of the remaining results came from other apartment communities with similar complaint vocabulary. As a result, the generation step received incomplete Sentry-specific evidence and produced a partially accurate answer that missed some expected management-related concerns such as poor communication, ignored complaints, and slow responses.
 
 **What you would change to fix it:**
+I would improve retrieval by combining semantic search with stronger apartment-specific matching. One possible approach would be hybrid retrieval that combines embeddings with keyword or metadata filtering on apartment names. I would also experiment with stronger reranking models that better distinguish complaints belonging to one apartment community from similar complaints discussed in reviews of other communities.
 
 ---
 
