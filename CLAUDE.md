@@ -24,6 +24,7 @@ Read planning.md first. It is the source of truth for the project design.
 
 - src/embedding/ -> embedding and vector store code
   - vectorstore.py -> embedding generation and ChromaDB storage
+  - retriever.py -> semantic retrieval and property-aware reranking
 
 ## Source rules
 
