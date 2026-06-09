@@ -82,9 +82,11 @@ Using paragraph-first recursive splitting was particularly important for this da
      latency, and local vs. API-hosted. -->
 
 **Model used:**
+
 I used `all-MiniLM-L6-v2` from the Sentence Transformers library. This model was chosen because it is free, runs locally, has no API costs or rate limits, and provides good semantic retrieval performance for short to medium-length text. Since the corpus consists primarily of apartment reviews and Reddit discussions written in English, all-MiniLM-L6-v2 provided a good balance between retrieval quality, speed, and simplicity. Its small size also made it practical to embed all 3,213 chunks locally without requiring specialized hardware.
 
 **Production tradeoff reflection:**
+
 For this project, `all-MiniLM-L6-v2` worked well because the corpus is relatively small and all documents are written in English. It provided fast embedding generation and retrieval while running entirely locally. 
 
 If I were deploying the system for real users and cost was not a concern, I would experiment with larger embedding models that may better distinguish between apartment reviews that use very similar language. Many reviews in this dataset discuss common topics such as maintenance, management, safety, and noise, which can make different apartment communities appear semantically similar. A stronger embedding model could potentially improve retrieval precision for those cases. I would also weigh the tradeoff between retrieval quality and latency, since larger models generally require more computation and increase response times. 
@@ -104,7 +106,17 @@ Additionally, models with stronger multilingual support would become more valuab
 
 **System prompt grounding instruction:**
 
+Grounding is enforced through a combination of retrieval and a strict system prompt. Before generation, the system retrieves the most relevant chunks from ChromaDB and formats them into a structured context block containing source information and review text. Only this retrieved context is provided to the LLM.
+
+The system prompt explicitly instructs the model to answer only from the retrieved context and avoid using general training knowledge. One of the core instructions is:
+
+> "Answer ONLY from the retrieved context provided in the user message. Do not use your general training knowledge."
+
+The prompt also instructs the model not to invent apartments, facts, prices, or explanations that are not present in the retrieved context, avoid speculation, and keep responses concise and evidence-based. If the retrieved context does not contain enough information, the model is instructed to respond with: **"I don't have enough information on that."**
+
 **How source attribution is surfaced in the response:**
+
+Source attribution is handled programmatically rather than relying on the LLM. After retrieval, metadata from the retrieved chunks is used to generate a deduplicated source list that is displayed alongside the answer. The user interface also includes a **Supporting Evidence (Advanced)** section that shows the retrieved chunks and retrieval details for transparency and debugging.
 
 ---
 
