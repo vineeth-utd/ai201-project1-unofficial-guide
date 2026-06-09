@@ -1,12 +1,5 @@
 # The Unofficial Guide — Project 1
 
-> **How to use this template:**
-> Complete each section *after* you've built and tested the corresponding part of your system.
-> Do not write placeholder text — if a section isn't done yet, leave it blank and come back.
-> Every section below is required for submission. One-liners will not receive full credit.
-
----
-
 ## Domain
 
 <!-- What topic or category of knowledge does your system cover?
@@ -83,15 +76,25 @@ Using paragraph-first recursive splitting was particularly important for this da
 
 **Model used:**
 
-I used `all-MiniLM-L6-v2` from the Sentence Transformers library. This model was chosen because it is free, runs locally, has no API costs or rate limits, and provides good semantic retrieval performance for short to medium-length text. Since the corpus consists primarily of apartment reviews and Reddit discussions written in English, all-MiniLM-L6-v2 provided a good balance between retrieval quality, speed, and simplicity. Its small size also made it practical to embed all 3,213 chunks locally without requiring specialized hardware.
+I used **all-MiniLM-L6-v2** from the Sentence Transformers library. This model was chosen because it is free, runs locally, has no API costs or rate limits, and provides good semantic retrieval performance for short to medium-length text. Since the corpus consists primarily of apartment reviews and Reddit discussions written in English, all-MiniLM-L6-v2 provided a good balance between retrieval quality, speed, and simplicity. Its small size also made it practical to embed all 3,213 chunks locally without requiring specialized hardware.
 
 **Production tradeoff reflection:**
 
-For this project, `all-MiniLM-L6-v2` worked well because the corpus is relatively small and all documents are written in English. It provided fast embedding generation and retrieval while running entirely locally. 
+For this project, **all-MiniLM-L6-v2** worked well because the corpus is relatively small and all documents are written in English. It provided fast embedding generation and retrieval while running entirely locally. 
 
 If I were deploying the system for real users and cost was not a concern, I would experiment with larger embedding models that may better distinguish between apartment reviews that use very similar language. Many reviews in this dataset discuss common topics such as maintenance, management, safety, and noise, which can make different apartment communities appear semantically similar. A stronger embedding model could potentially improve retrieval precision for those cases. I would also weigh the tradeoff between retrieval quality and latency, since larger models generally require more computation and increase response times. 
 
 Additionally, models with stronger multilingual support would become more valuable if the system expanded beyond English-language reviews, and models that support longer context windows could be useful if future documents contained longer discussions or forum threads.
+
+---
+
+## Retrieval Strategy
+
+The system uses ChromaDB as its vector store and all-MiniLM-L6-v2 embeddings for semantic retrieval. For each query, the system first retrieves the top 10 semantic matches from ChromaDB.
+
+During evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints often use very similar language. To improve retrieval quality, I implemented a property-aware reranking step. When a query explicitly mentions an apartment name, chunks associated with that apartment are boosted before the final results are returned.
+
+The final retrieval stage returns the top 5 chunks, which are then passed to the generation pipeline.
 
 ---
 
@@ -161,8 +164,6 @@ What concerns do residents raise about management at Sentry Tempe?
 The system identified concerns such as rude maintenance staff, unresolved plumbing and air conditioning issues, management disregarding resident safety, and eviction threats. While these concerns were grounded in retrieved reviews, the answer did not fully capture other recurring themes such as poor communication, ignored complaints, slow responses, and lack of urgency from management.
 
 **Root cause (tied to a specific pipeline stage):**
-This failure originated in the retrieval stage. The embedding model (all-MiniLM-L6-v2) retrieved reviews from other apartment communities because management and maintenance complaints use similar language across many apartment complexes. Although property-aware reranking improved retrieval quality, only a small number of Sentry Tempe reviews appeared in the top semantic retrieval results. As a result, the generation step received incomplete Sentry-specific evidence and produced a partially accurate answer.
-
 This failure originated in the retrieval stage. The embedding model (all-MiniLM-L6-v2) retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across many apartment complexes. Although property-aware reranking improved retrieval quality, only 2 Sentry Tempe chunks appeared in the top 10 semantic retrieval results. Most of the remaining results came from other apartment communities with similar complaint vocabulary. As a result, the generation step received incomplete Sentry-specific evidence and produced a partially accurate answer that missed some expected management-related concerns such as poor communication, ignored complaints, and slow responses.
 
 **What you would change to fix it:**
