@@ -68,6 +68,60 @@ A 100-character overlap was configured to preserve continuity when longer review
 
 Using paragraph-first recursive splitting was particularly important for this dataset because apartment reviews often contain multiple independent observations in separate paragraphs. Preserving those boundaries helps retrieval return focused evidence rather than large mixed-topic chunks.
 
+--- 
+
+## Sample Chunks
+
+The examples below illustrate how the recursive chunking strategy handled reviews and Reddit discussions of different lengths. Short comments often remained as a single chunk, while longer reviews and discussions were split into multiple chunks when necessary.
+
+### Chunk 1 — IMT Desert Palm Village Reviews
+
+**Review split into 2 chunks (showing Chunk 0 of 2)**
+
+> I submitted a work order for my apartment as soon as the office opened in the morning. Adon from Maintenance arrived at my door shortly after. He is always friendly and greets me when I open the door. I explained what I needed, and he understood my requests. He then went to get the necessary parts and returned promptly to complete the work quickly and efficiently. Adon knows his job well and handles work order requests in a timely and effective manner!
+
+**Source:** ApartmentRatings - IMT Desert Palm Village Reviews
+
+---
+
+### Chunk 2 — IMT Desert Palm Village Reviews
+
+**Review split into 3 chunks (showing Chunk 0 of 3)**
+
+> If you're moving from out of state, look no further than Stephanie! She's absolutely amazing at what she does. From our very first conversation, she took the time to thoroughly explain everything about the area, which made me feel so much more comfortable with the move. What I really appreciated was her responsiveness, she was always there to answer my questions and ease my worries. Moving can be super stressful, but Stephanie made the whole process seamless
+
+**Source:** ApartmentRatings - IMT Desert Palm Village Reviews
+
+---
+
+### Chunk 3 — Paseo on University Reviews
+
+**Review split into 4 chunks (showing Chunk 0 of 4)**
+
+> Not great. I have lived here almost 3 years and stuff never gets taken care of. Stove has been broken fir a year, apparently the ability to cook is of no priority. Have had bug issues since we moved in, have had dishwasher replaced 2 times, but my final straw is my ac has been broken for 9 hours now, and IF they have emergency maintenance, there is no way to get ahold of them. No number to call, all you can do is put in a work order online
+
+**Source:** ApartmentRatings - Paseo on University Reviews
+
+---
+
+### Chunk 4 — Reddit: Apartments Near ASU
+
+**Comment split into 3 chunks (showing Chunk 0 of 3)**
+
+> Just don’t go towards Mesa or too far south. A few miles from tempe campus in any direction will be the cheaper but still nice enough options. Head north too far into scottsdale and everything is nice and safe but also one of the most expensive cities to live in the whole US. South scottsdale is okay in price still
+
+**Source:** Reddit — r/ASU - Apartments Near ASU
+
+---
+
+### Chunk 5 — Reddit: Apartments to Avoid
+
+**Single-chunk comment**
+
+> Don't sign with Nexa, scammed us for about $500 at move out and according to more negative reviews citing the same on google and elsewhere, seems this is a common practice for them. Preying mostly on foreign students who when they move out and leave the country cant do anything about it.
+
+**Source:** Reddit — r/ASU - Apartments to Avoid
+
 ---
 
 ## Embedding Model
