@@ -39,6 +39,10 @@ Read planning.md first. It is the source of truth for the project design.
 - src/generation/ -> grounded answer generation
   - generator.py -> retrieval-to-LLM generation pipeline
 
+- tests/ -> validation scripts
+  - test_retriever.py -> retrieval validation and reranking inspection
+  - test_generator.py -> generation validation and grounding inspection
+
 ## Source Rules
 
 - Reddit and ApartmentRatings have different JSON structures.
@@ -137,8 +141,7 @@ Implemented and validated.
 - Vector store: ChromaDB
 - Final top-k: 5
 
-Retrieval process:
-
+Retrieval process:  
 1. Retrieve the top 10 semantic matches from ChromaDB.
 2. Detect whether the query explicitly mentions an apartment property.
 3. Apply property-aware reranking:
@@ -150,6 +153,10 @@ Retrieval process:
 7. Duplicate sources are consolidated into a single citation entry before display.
 
 Property-aware reranking is only applied when the query explicitly mentions an apartment property. Otherwise, retrieval uses pure semantic search.
+
+Initialization behavior:
+- Validates that the ChromaDB path and collection exist before retrieval.
+- Provides clear error messages when the vector store is missing or invalid.
 
 ## Generation
 
@@ -168,6 +175,11 @@ Generation output includes:
 - Citation remapping when multiple retrieved chunks originate from the same source.
 - A refusal response when retrieved context is insufficient.
 - A Supporting Evidence section exposing retrieved chunks and retrieval details for debugging and transparency.
+
+Error handling:
+- Missing GROQ_API_KEY returns a user-friendly error message.
+- API failures, network issues, and service errors are handled gracefully.
+- Retrieval failures are surfaced to the user instead of producing a traceback.
 
 ## User Interface
 
@@ -207,4 +219,6 @@ Known failure case:
 - Prefer simple, readable code.
 - Evaluate retrieval quality before modifying generation behavior.
 - Prefer fixing retrieval issues at the retrieval layer rather than compensating in prompts.
+- Keep validation and inspection logic in `tests/` rather than production modules.
+- Handle external service failures gracefully and provide user-friendly error messages.
 - Update planning.md only if the actual implementation changes.
