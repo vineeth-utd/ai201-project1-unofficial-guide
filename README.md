@@ -156,6 +156,88 @@ The final retrieval stage returns the **top 5** chunks, which are then passed to
 
 ---
 
+## Retrieval Examples
+
+### Example 1
+
+**Query:**
+Why do multiple residents recommend avoiding Paseo on University?
+
+**Top Retrieved Chunks:**
+
+1. Reddit — Apartments to Avoid
+   > "Not sure if someone posted it yet. But avoid Paseo on University at all costs (Formally 1255)"
+
+2. Reddit — Apartments to Avoid
+   > "Don’t go to paseo on university! There’s a ton of roaches and also frequent water/plumbing issues. It was also very unsafe, as a woman I would get harassed at my complex weekly and there is 0 security. I also recommend Nexa like others have said. It’s very close to campus and clean with minimal utility/bug issues. I lived there for a short amount of time and didn’t experience a ton of rowdy undergrad types like you’d expect so close to campus, there are lots of professionals living there!"
+
+3. ApartmentRatings — Paseo on University
+   > "Pros: It is extremely easy to get to campus. There is lots of covered parking. The apartments are fairly roomy (at least the 2 bedrooms, not sure about others).  The location is fairly safe, I wouldn't worry about walking around alone.  It's also very close to a lot of great places like FourPeaks, Mill Avenue (if you like to walk), etc.  We never had an issue with maintenance taking too long.  The only issue we ever had was with our garbage disposal, and they fixed it within a day"
+
+4. Reddit — Cheap Apartments near ASU Tempe recommendations?
+   > "Alight or paseo on University are cheap options."
+
+5. ApartmentRatings — Paseo on University
+   > "overall i am really happy that i chose the quads over the village on university.  my friends moved there and they hate it! they can never get any sleep and cops are always busting up parties.  i definately reccommend the quads!\n\nManagement Response:\nThank you for your feedback, This property is now under new management. For more information, please visit our website at https://www.paseoonuniversity.com/."
+
+**Why these chunks are relevant (Example 1)**
+
+The retrieved chunks directly discuss Paseo on University and include many of the issues mentioned in the expected answer. The results contain reports of roach infestations, plumbing and water problems, safety concerns, harassment, noisy neighbors, and negative resident experiences. Four of the five retrieved chunks specifically reference Paseo on University, showing that the retrieval system was able to find apartment-specific evidence for the query.
+
+### Example 2
+
+**Query:**
+What positive experiences do residents mention about IMT Desert Palm Village?
+
+**Top Retrieved Chunks:**
+
+1. ApartmentRatings — IMT Desert Palm Village
+   > "Hello Chelarvezb8, thank you for sharing your wonderful experience at IMT Desert Palm Village. We're so pleased to hear that the property and our team, especially Kelly Culley, have made such a positive impact on your stay. Your kind words about the ambiance, amenities, and staff attentiveness are greatly appreciated. We strive to create a welcoming and comfortable environment for all our residents. If there's anything else we can do to enhance your experience, please let us know!"
+
+2. ApartmentRatings — IMT Desert Palm Village
+   > "Management Response:\nThank you for sharing your positive experience at IMT Desert Palm Village! We're glad you love the neighborhood and appreciate your kind words. We strive to provide a comfortable and enjoyable living experience for all our residents. Thanks for choosing to call us home!"
+
+3. ApartmentRatings — IMT Desert Palm Village
+   > "IMT Desert Palm Village in Tempe, the property exceeded all my expectations. With its lush, garden-like ambiance, contemporary kitchen appliances, ample storage, and thoughtful layouts across the one-to-three-bedroom units, it truly feels like a retreat from the hustle and bustle The staff is consistently warm, responsive, and professional whether it is coordinating a tour, handling a maintenance request, or answering questions at the leasing office"
+
+4. ApartmentRatings — IMT Desert Palm Village
+   > "Management Response:\nHello anonymous, thank you for your positive feedback! We're glad to hear that you're enjoying your time at imt Desert Palm Village and finding the location convenient. It's great to know that Garrett has been helpful and sociable. We appreciate your comments and look forward to continuing to provide a great living experience."
+
+5. ApartmentRatings — IMT Desert Palm Village
+   > "Management Response:\nHello paulaperry413@gmail.com, thank you for your positive feedback! We're glad to hear that you're enjoying your residency at IMT Desert Palm Village. Your recommendation means a lot to us. We look forward to continuing to provide a great living experience for you and potential new residents."
+
+**Why these chunks are relevant (Example 2)**
+
+All five retrieved chunks came from IMT Desert Palm Village reviews and focus on positive resident experiences. The results mention helpful and responsive staff, positive interactions with leasing office employees, convenient location, amenities, and overall satisfaction with the community. The retrieval system successfully returned apartment-specific reviews that matched the positive sentiment requested in the query.
+
+### Example 3
+
+**Query:**
+What concerns do residents raise about management at Sentry Tempe?
+
+**Top Retrieved Chunks:**
+
+1. ApartmentRatings — Sentry Tempe
+   > "I would strongly discourage anyone from moving into Sentry Tempe. My experience living here has been extremely frustrating and disappointing. There have been ongoing plumbing and drainage problems that constantly require attention just to function normally"
+
+2. ApartmentRatings — Sentry Tempe
+   > "It is terrible, the management has no regard for the safety or quality of life of its residents. The maintenance staff is rude and only half fixes things. They just blow you off with excuses but if you're even two days late on rent they threaten to evict you. This community is unprofessional. It's currently 85 degrees in our apartment and the management won't turn our chillers on for A/C"
+
+3. ApartmentRatings — Paseo on University
+   > "Worst management you could find in Tempe. 1) water can go out without informing you in advance as new changes to property is more important than it's current resident 2) safety point of view few people heard gun shots last month at 12fifty5 apartments 3)our mailbox doesn't have a lock on it 4)common amenities are not on lease. it's just for advertisement and you cannot argue about it"
+
+4. ApartmentRatings — IMT Desert Palm Village
+   > "Management can make or break one's living experience at any complex. The staff here are amazing and have always been helpful, regardless of what I bring to them to resolve. I've lived in a lot of different apartments in the Tempe area, and this complex is by far the best place I have ever lived. Maintenance issues are ALWAYS taken care of timely, the landscape is maintained, the common areas are clean and everyone in the front office is friendly and personable. This is a great place to live!!!!"
+
+5. ApartmentRatings — Paseo on University
+   > "When on the apartment's \"top ten reasons for living here\" they have to mention location three times you should know something is wrong.  This is my second apartment complex in Tempe and I chose this one because it is so close to ASU.  The management staff is unprofessional at best.  They act as though water outages are not a big deal"
+
+**Retrieval observation (Example 3)**
+
+The retrieval system successfully returned two highly relevant Sentry Tempe reviews that discussed management problems. However, three of the remaining top five results came from other apartment communities discussing similar management issues. This happened because complaints about management, maintenance, and communication often use very similar language across different apartment complexes. Although the property-aware reranking step increased the number of Sentry Tempe results, unrelated apartment reviews still appeared in the final retrieved context. This retrieval weakness contributed to the inaccurate answer generated for this question.
+
+---
+
 ## Grounded Generation
 
 <!-- Explain how your system enforces grounding — how does it prevent the LLM from answering
