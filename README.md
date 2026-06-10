@@ -44,18 +44,22 @@ This project focuses on off-campus housing experiences near Arizona State Univer
      - What your final chunk count was across all documents -->
 
 **Preprocessing before chunking:**
+
 The raw data collected from Reddit and ApartmentRatings was first stored as JSON files in the `documents/raw` directory. A cleaning pipeline then extracted the actual review and discussion content along with relevant metadata such as apartment name, thread title, author, rating, date, and source URL. The cleaned output was stored as structured text files in the `documents/cleaned` directory, where each review or Reddit comment was represented as a readable review block. The chunking pipeline operates on these cleaned text files rather than the raw JSON data.
 
 The cleaned review blocks were stored together with metadata such as *source platform*, *apartment name* or *discussion title*, *source URL*, *author*, *date*, *rating* (when available), and *chunk position*. This metadata was preserved throughout the pipeline for retrieval and source attribution.
 
+**Chunk configuration:**
+- **Chunk size:** 500 characters
+- **Overlap:** 100 characters
+- **Final chunk count:** 3,213 chunks across all 10 source documents.
+
 **Chunking approach:**
+
 A recursive chunking strategy was used. The splitter first attempts to preserve natural semantic boundaries by splitting at paragraph breaks. If a section is still too large, it falls back to sentence boundaries, and only then uses character-based splitting as a last resort. This approach helps keep complete thoughts, recommendations, and complaints together whenever possible. Short Reddit comments and shorter apartment reviews typically remain intact as a single chunk, while longer reviews are divided only when necessary.
 
-**Chunk size:** 500 characters
-
-**Overlap:** 100 characters
-
 **Why these choices fit your documents:**
+
 The corpus consists primarily of apartment reviews and Reddit discussions. Many Reddit comments are short and self-contained, while ApartmentRatings reviews can span multiple paragraphs and discuss several topics such as maintenance, management, safety, amenities, pricing, and move-in experiences.
 
 A chunk size of 500 characters was chosen because it is usually large enough to preserve a complete recommendation, complaint, or resident experience within a single chunk while still being small enough to support precise retrieval. Larger chunks would risk combining multiple unrelated topics into a single embedding, while smaller chunks could fragment reviews and lose important context.
@@ -63,8 +67,6 @@ A chunk size of 500 characters was chosen because it is usually large enough to 
 A 100-character overlap was configured to preserve continuity when longer reviews had to be split. In practice, many Reddit comments and shorter apartment reviews remained as single chunks and therefore did not require overlap. For longer reviews, paragraph-level splits generally did not require overlap because each paragraph often represented a separate observation or topic. When a paragraph was still too large and needed to be split at sentence boundaries, overlap was used to preserve context between adjacent chunks.
 
 Using paragraph-first recursive splitting was particularly important for this dataset because apartment reviews often contain multiple independent observations in separate paragraphs. Preserving those boundaries helps retrieval return focused evidence rather than large mixed-topic chunks.
-
-**Final chunk count:** 3,213 chunks across all 10 source documents.
 
 ---
 
@@ -113,11 +115,15 @@ The final retrieval stage returns the **top 5** chunks, which are then passed to
 
 Grounding is enforced through a combination of retrieval and a strict system prompt. Before generation, the system retrieves the most relevant chunks from ChromaDB and formats them into a structured context block containing source information and review text. Only this retrieved context is provided to the LLM.
 
-The system prompt explicitly instructs the model to answer only from the retrieved context and avoid using general training knowledge. One of the core instructions is:
+The system prompt explicitly instructs the model to answer only from the retrieved context and avoid using general training knowledge. 
+
+**Key grounding instruction:**
 
 > "Answer ONLY from the retrieved context provided in the user message. Do not use your general training knowledge."
 
-The prompt also instructs the model not to invent apartments, facts, prices, or explanations that are not present in the retrieved context, avoid speculation, and keep responses concise and evidence-based. If the retrieved context does not contain enough information, the model is instructed to respond with: **"I don't have enough information on that."**
+The prompt also instructs the model not to invent apartments, facts, prices, or explanations that are not present in the retrieved context, avoid speculation, and keep responses concise and evidence-based. If the retrieved context does not contain enough information, the model is instructed to respond with: 
+
+> "I don't have enough information on that."
 
 **How source attribution is surfaced in the response:**
 
@@ -160,15 +166,19 @@ The table below summarizes the system's responses. Full responses were reviewed 
      results from an unrelated review" is an explanation. -->
 
 **Question that failed:**
+
 What concerns do residents raise about management at Sentry Tempe?
 
 **What the system returned:**
+
 The system identified concerns such as rude maintenance staff, unresolved plumbing and air conditioning issues, management disregarding resident safety, and eviction threats. While these concerns were grounded in retrieved reviews, the answer did not fully capture other recurring themes such as poor communication, ignored complaints, slow responses, and lack of urgency from management.
 
 **Root cause (tied to a specific pipeline stage):**
+
 This failure originated in the retrieval stage. The embedding model (all-MiniLM-L6-v2) retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across many apartment complexes. Although property-aware reranking improved retrieval quality, only 2 Sentry Tempe chunks appeared in the top 10 semantic retrieval results. Most of the remaining results came from other apartment communities with similar complaint vocabulary. As a result, the generation step received incomplete Sentry-specific evidence and produced a partially accurate answer that missed some expected management-related concerns such as poor communication, ignored complaints, and slow responses.
 
 **What you would change to fix it:**
+
 I would improve retrieval by combining semantic search with stronger apartment-specific matching. One possible approach would be hybrid retrieval that combines embeddings with keyword or metadata filtering on apartment names. I would also experiment with stronger reranking models that better distinguish complaints belonging to one apartment community from similar complaints discussed in reviews of other communities.
 
 ---
@@ -179,10 +189,16 @@ I would improve retrieval by combining semantic search with stronger apartment-s
      Answer both questions with at least 2–3 sentences each. -->
 
 **One way the spec helped you during implementation:**
-The planning document served as a useful blueprint throughout development. Defining the document sources, chunking strategy, retrieval approach, evaluation questions, and architecture before writing code made it much easier to build the system incrementally. Because each stage of the pipeline was planned in advance, the implementation of one milestone naturally prepared the inputs required for the next milestone. The planning document also provided valuable context when working with AI coding tools, since I could share the relevant sections of the spec and architecture diagram to help the tool understand not only the current task but also how that component fit into the overall system design. This resulted in more accurate code generation and reduced the amount of rework needed later in the project.
+
+The planning document served as a useful blueprint throughout development. Defining the document sources, chunking strategy, retrieval approach, evaluation questions, and architecture before writing code made it much easier to build the system incrementally. 
+
+Because each stage of the pipeline was planned in advance, the implementation of one milestone naturally prepared the inputs required for the next milestone. The planning document also provided valuable context when working with AI coding tools, since I could share the relevant sections of the spec and architecture diagram to help the tool understand not only the current task but also how that component fit into the overall system design. This resulted in more accurate code generation and reduced the amount of rework needed later in the project.
 
 **One way your implementation diverged from the spec, and why:**
-The original retrieval approach in the spec assumed a straightforward semantic retrieval pipeline that returned the top-k results from ChromaDB. During implementation and evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across properties. To improve retrieval quality, I introduced a property-aware reranking step that first retrieves the top 10 semantic matches and then boosts chunks associated with the apartment mentioned in the query before returning the final top 5 results. This change was made based on evaluation results and improved retrieval precision for apartment-specific questions.
+
+The original retrieval approach in the spec assumed a straightforward semantic retrieval pipeline that returned the top-k results from ChromaDB. During implementation and evaluation, I observed that apartment-specific queries sometimes retrieved reviews from other apartment communities because management and maintenance complaints use very similar language across properties. 
+
+To improve retrieval quality, I introduced a property-aware reranking step that first retrieves the top 10 semantic matches and then boosts chunks associated with the apartment mentioned in the query before returning the final top 5 results. This change was made based on evaluation results and improved retrieval precision for apartment-specific questions.
 
 ---
 
@@ -200,12 +216,15 @@ The original retrieval approach in the spec assumed a straightforward semantic r
 **Instance 1**
 
 - *What I gave the AI:* 
+
   I provided Claude Code with the relevant sections of `planning.md`, including the document sources, chunking strategy, retrieval approach, and architecture diagram. I used Claude in Plan Mode with Thinking enabled and asked it to first generate an implementation plan before making any code changes.
 
 - *What it produced:*
+
   Claude produced a detailed implementation plan and then generated the core pipeline components, including the ingestion and cleaning pipeline, recursive chunking logic, embedding and ChromaDB storage pipeline, retrieval pipeline, grounded generation pipeline, and Gradio interface. It also generated validation scripts that were used to inspect chunk quality, evaluate retrieval behavior, and test grounded generation.
 
 - *What I changed or overrode:*
+
   I reviewed the generated plans before allowing implementation and adjusted several design decisions. Rather than generating the entire system at once, I built the project incrementally, validating each pipeline stage before moving to the next. I also reviewed and understood the generated code before running or committing it, rather than accepting it directly. This included inspecting cleaned documents before chunking, reviewing chunk quality before generating embeddings, evaluating retrieval results before implementing generation, and analyzing retrieval failures before introducing property-aware reranking.
 
   I chose to keep short reviews and Reddit comments as single chunks whenever possible, retained the 500-character chunk size and 100-character overlap after validating chunk quality, and later introduced property-aware reranking when evaluation showed that apartment-specific queries were retrieving reviews from other apartment communities.
@@ -213,14 +232,15 @@ The original retrieval approach in the spec assumed a straightforward semantic r
 **Instance 2**
 
 - *What I gave the AI:*
+
   I used ChatGPT throughout the project to brainstorm ideas, review implementation decisions, and understand specific concepts and APIs. I discussed topics such as chunking tradeoffs, overlap behavior, retrieval evaluation, ChromaDB APIs, source attribution strategies, and grounded generation techniques.
 
   For example, I used ChatGPT to better understand how overlap behaved in my recursive chunking implementation, how ChromaDB collections and retrieval APIs worked, and to review retrieval results when evaluating the Sentry Tempe management query.
 
-
 - *What it produced:*
+
   ChatGPT provided explanations of technical concepts, feedback on implementation choices, and suggestions for interpreting retrieval and evaluation results. It also helped me reason about why certain retrieval failures were occurring and explained the tradeoffs of different approaches such as changing chunk sizes, metadata filtering, and retrieval reranking.
 
-
 - *What I changed or overrode:*
+
   I used the explanations and feedback to validate my own decisions rather than accepting suggestions directly. For example, after reviewing the retrieval results for the Sentry Tempe query, I decided not to change the chunk size or overlap because the issue was caused by semantically similar apartment reviews rather than chunk fragmentation. I also selectively adopted improvements such as property-aware reranking and refined source attribution only after evaluating how they affected the behavior of the system.
