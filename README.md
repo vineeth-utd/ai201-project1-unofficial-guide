@@ -323,6 +323,40 @@ I don't have enough information on that.
 
 ---
 
+## Query Interface
+
+The interface has one input field and three output areas.
+
+**Input field**
+- **Your Question**: a text box where the user types a housing question.
+- The user can submit the question by clicking **Ask** or pressing Enter.
+- If the box is empty, the app returns: **"Please enter a question."**
+
+**Output fields**
+- **Answer**: the generated response from the system.
+- **Sources**: a deduplicated list of sources used in the answer, with clickable links.
+- **Supporting Evidence (Advanced)**: a collapsible debug section that shows the retrieved chunks, their source mapping, chunk index, and distance score.
+
+The interface is designed so the answer is easy to read first, while the sources and retrieved evidence are available right below it for transparency.
+
+### Sample interaction
+
+**User question:**  
+Why do multiple residents recommend avoiding Paseo on University?
+
+**System response:**  
+According to the context, multiple residents recommend avoiding Paseo on University due to issues such as a "ton of roaches" and "frequent water/plumbing issues" [1], and also because it's "very unsafe" with "0 security" and harassment [1]. Additionally, another resident simply states to "avoid Paseo on University at all costs" [1].
+
+**Sources used:**  
+[1] Reddit — Apartments to Avoid  
+[2] ApartmentRatings — Paseo on University  
+[3] Reddit — Cheap Apartments near ASU Tempe recommendations?
+
+**Supporting Evidence (Advanced):**  
+A collapsible debug section is also available that displays the retrieved chunks, source mappings, chunk indices, and retrieval scores used to generate the response. This section is intended for transparency and debugging rather than normal end-user interaction.
+
+---
+
 ## Evaluation Report
 
 <!-- Run your 5 test questions from planning.md through your system and record the results.
