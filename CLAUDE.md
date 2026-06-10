@@ -2,7 +2,15 @@
 
 Read planning.md first. It is the source of truth for the project design.
 
-## Repo structure
+## Repo Structure
+
+### Project Files
+
+- app.py -> Gradio user interface and application entry point
+- planning.md -> project specification and implementation plan
+- README.md -> project documentation, evaluation results, and reflections
+
+### Data and Storage
 
 - assets/ -> architecture diagram
 
@@ -15,6 +23,8 @@ Read planning.md first. It is the source of truth for the project design.
 - documents/chunks.json -> chunked corpus with metadata
 
 - documents/chroma_db/ -> persistent ChromaDB vector store
+
+### Source Code
 
 - src/ingestion/ -> ingestion, normalization, and chunking code
   - reddit_extractor.py -> Reddit-specific extraction and normalization
@@ -29,13 +39,13 @@ Read planning.md first. It is the source of truth for the project design.
 - src/generation/ -> grounded answer generation
   - generator.py -> retrieval-to-LLM generation pipeline
 
-## Source rules
+## Source Rules
 
 - Reddit and ApartmentRatings have different JSON structures.
 - Do not assume the same keys exist in both.
 - One raw source document should become one cleaned text file.
 
-## Cleaning format
+## Cleaning Format
 
 - Keep metadata with each comment/review block.
 - Preserve source URL, title/property name, author, date, rating if available, and management response if available.
@@ -135,6 +145,9 @@ Retrieval process:
    - ApartmentRatings chunks are boosted when apartment_name matches.
    - Reddit chunks are boosted when the apartment name appears in the chunk text.
 4. Return the final top 5 results.
+5. Retrieved chunks are passed to the generation pipeline.
+6. Source attribution is generated programmatically from chunk metadata.
+7. Duplicate sources are consolidated into a single citation entry before display.
 
 Property-aware reranking is only applied when the query explicitly mentions an apartment property. Otherwise, retrieval uses pure semantic search.
 
@@ -148,10 +161,50 @@ Implemented and validated.
 - If retrieved context does not contain enough information, respond:
   "I don't have enough information on that."
 
-Source attribution is added programmatically using retrieved metadata rather than relying on the LLM to generate citations.
+Source attribution is handled programmatically rather than relying on the LLM.
 
-## Development notes
+Generation output includes:
+- Deduplicated source attribution.
+- Citation remapping when multiple retrieved chunks originate from the same source.
+- A refusal response when retrieved context is insufficient.
+- A Supporting Evidence section exposing retrieved chunks and retrieval details for debugging and transparency.
+
+## User Interface
+
+Implemented and validated.
+
+Input:
+- Housing-related question entered through a Gradio textbox.
+
+Outputs:
+- Answer
+- Sources Used
+- Supporting Evidence (Advanced)
+
+Supporting Evidence displays:
+- Retrieved chunks
+- Retrieval distance scores
+- Property-aware reranking indicators
+- Chunk-to-source mappings
+
+The interface is intended to provide both a simple user-facing experience and transparency into the retrieval process.
+
+## Evaluation
+
+Implemented and documented in README.
+
+Evaluation consists of:
+- Five predefined test questions from planning.md
+- Retrieval quality assessment
+- Response accuracy assessment
+- Failure case analysis
+
+Known failure case:
+- Apartment-specific management queries may retrieve reviews from other apartment communities when semantically similar management complaints dominate retrieval results.
+
+## Development Notes
 
 - Prefer simple, readable code.
-- Validate outputs before moving to the next stage.
+- Evaluate retrieval quality before modifying generation behavior.
+- Prefer fixing retrieval issues at the retrieval layer rather than compensating in prompts.
 - Update planning.md only if the actual implementation changes.
