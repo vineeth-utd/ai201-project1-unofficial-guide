@@ -267,6 +267,62 @@ Source attribution is handled programmatically rather than relying on the LLM. A
 
 ---
 
+## Grounded Response Examples
+
+### Example 1 — In-Scope Query
+
+**Query:**
+Why do multiple residents recommend avoiding Paseo on University?
+
+**System Response:**
+
+According to the context, multiple residents recommend avoiding Paseo on University due to issues such as a "ton of roaches" and "frequent water/plumbing issues" [1], and also because it's "very unsafe" with "0 security" and harassment [1]. Additionally, another resident simply states to "avoid Paseo on University at all costs" [1].
+
+**Sources Used:**
+
+[1] Reddit — Apartments to Avoid  
+[2] ApartmentRatings — Paseo on University  
+[3] Reddit — Cheap Apartments near ASU Tempe recommendations?
+
+### Example 2 — In-Scope Query
+
+**Query:**
+What complaints are mentioned about Onnix?
+
+**System Response:**
+
+Complaints mentioned about Onnix include:
+
+- plumbing issues
+- laundry rooms being out of order
+- bugs/pest issues
+- maintenance issues
+- water being turned off too often
+- deceitful and unhelpful management (specifically after Bridge Property Management took over).
+
+**Sources Used:**
+
+[1] ApartmentRatings — Onnix
+
+### Example 3 — Out-of-Scope Query
+
+**Query:**
+What is the average rent for a one-bedroom apartment in downtown Phoenix?
+
+**System Response:**
+
+I don't have enough information on that.
+
+**Retrieved Context (Insufficient to Answer):**
+
+[1] ApartmentRatings — Sentry Tempe  
+[2] Reddit — Cheap Apartments near ASU Tempe recommendations?  
+[3] Reddit — Off-Campus Apartments  
+[4] ApartmentRatings — Murietta at ASU  
+[5] Reddit — What apartments are good in Tempe, near ASU?
+
+---
+
 ## Evaluation Report
 
 <!-- Run your 5 test questions from planning.md through your system and record the results.
