@@ -15,7 +15,10 @@ def ask(question: str):
     if not question.strip():
         return "Please enter a question.", "", ""
 
-    result = generate(question)
+    try:
+        result = generate(question)
+    except Exception as e:
+        return f"An unexpected error occurred: {e}", "", ""
 
     # Normalize LLM citation style: "(Source: [N])" → "[N]"
     answer = re.sub(r'\(Source:\s*\[(\d+)\]\)', r'[\1]', result["answer"])

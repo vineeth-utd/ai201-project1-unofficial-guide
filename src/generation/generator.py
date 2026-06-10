@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -57,79 +58,59 @@ def _build_sources(chunks: list) -> list:
 
 
 def generate(query: str) -> dict:
-    client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        print("Error: GROQ_API_KEY is not set.", file=sys.stderr)
+        return {
+            "answer": "Configuration error: GROQ_API_KEY is not set. Please check your .env file.",
+            "sources": [],
+            "retrieved_chunks": [],
+        }
 
-    chunks = retrieve(query, k=5)
+    try:
+        client = Groq(api_key=api_key)
+    except Exception as e:
+        print(f"Error initializing Groq client: {e}", file=sys.stderr)
+        return {
+            "answer": "Failed to initialize the language model client. Please check your API key.",
+            "sources": [],
+            "retrieved_chunks": [],
+        }
+
+    try:
+        chunks = retrieve(query, k=5)
+    except RuntimeError as e:
+        print(f"Retrieval error: {e}", file=sys.stderr)
+        return {
+            "answer": str(e),
+            "sources": [],
+            "retrieved_chunks": [],
+        }
+
     context = _build_context(chunks)
     sources = _build_sources(chunks)
-
     user_message = f"Retrieved context:\n{context}\nQuestion: {query}"
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_message},
-        ],
-        temperature=0,
-    )
-
-    answer = response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=0,
+        )
+        answer = response.choices[0].message.content
+    except Exception as e:
+        print(f"Groq API error: {e}", file=sys.stderr)
+        return {
+            "answer": "The language model request failed. Please try again.",
+            "sources": sources,
+            "retrieved_chunks": chunks,
+        }
 
     return {
         "answer": answer,
         "sources": sources,
         "retrieved_chunks": chunks,
     }
-
-
-# ---------------------------------------------------------------------------
-# Validation
-# ---------------------------------------------------------------------------
-
-EVAL_QUERIES = [
-    (
-        "V1 (ApartmentRatings)",
-        "What concerns do residents raise about management at Sentry Tempe?",
-    ),
-    (
-        "V2 (Reddit)",
-        "What do ASU students on Reddit say about apartments to avoid near campus?",
-    ),
-    (
-        "V3 (Out-of-scope)",
-        "What is the average rent for a one-bedroom apartment in downtown Phoenix?",
-    ),
-]
-
-
-def main():
-    for label, query in EVAL_QUERIES:
-        print("=" * 72)
-        print(f"TEST {label}")
-        print(f"QUERY: {query}")
-        print("=" * 72)
-
-        result = generate(query)
-
-        print("\n--- Retrieved Chunks ---")
-        for i, chunk in enumerate(result["retrieved_chunks"], 1):
-            meta = chunk["metadata"]
-            source = meta.get("apartment_name") or meta.get("document_title") or "Unknown"
-            platform = meta.get("source_platform", "")
-            boosted = " [BOOSTED]" if chunk.get("boosted") else ""
-            print(f"  {i}. dist={chunk['distance']:.4f}{boosted}  {platform} — {source}")
-            print(f"     {chunk['text'][:120].replace(chr(10), ' ')}")
-
-        print("\n--- Answer ---")
-        print(result["answer"])
-
-        print("\n--- Sources ---")
-        for s in result["sources"]:
-            print(f"  • {s}")
-
-        print()
-
-
-if __name__ == "__main__":
-    main()
