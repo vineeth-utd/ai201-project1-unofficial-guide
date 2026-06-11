@@ -9,7 +9,6 @@
 
 ## Domain
 
-<!-- What domain did you choose? Why is this knowledge valuable and hard to find through official channels? -->
 **Off-Campus Housing Experiences Near Arizona State University (Tempe Campus)**
 
 This project focuses on off-campus housing experiences near Arizona State University's Tempe campus. Students searching for housing often need information about apartment quality, management responsiveness, maintenance issues, safety concerns, noise levels, commute convenience, and overall value for money. While apartment websites primarily advertise amenities and pricing, real resident experiences are scattered across review platforms and online discussions, making it difficult for students to efficiently compare housing options and make informed decisions. This system aims to make those unofficial experiences searchable through a single question-answering interface.
@@ -17,9 +16,6 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 ---
 
 ## Documents
-
-<!-- List your specific sources: URLs, subreddit names, forum threads, or file descriptions.
-     Aim for at least 10 sources that together cover different subtopics or perspectives within your domain. -->
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
@@ -38,11 +34,6 @@ This project focuses on off-campus housing experiences near Arizona State Univer
 
 ## Chunking Strategy
 
-<!-- How will you split documents into chunks?
-     State your chunk size (in tokens or characters), overlap size, and explain why those
-     numbers fit the structure of your documents.
-     A review-heavy corpus warrants different chunking than a long FAQ. -->
-
 **Chunk size:** 500 characters
 
 **Overlap:** 100 characters
@@ -55,12 +46,6 @@ I plan to use a recursive chunking strategy so that shorter reviews and comments
 ---
 
 ## Retrieval Approach
-
-<!-- Which embedding model are you using (e.g., all-MiniLM-L6-v2 via sentence-transformers)?
-     How many chunks will you retrieve per query (top-k)?
-     If you were deploying this for real users and cost wasn't a constraint, what tradeoffs
-     would you weigh in choosing a different embedding model — context length, multilingual
-     support, accuracy on domain-specific text, latency? -->
 
 **Embedding model:** all-MiniLM-L6-v2 (sentence-transformers)
 
@@ -76,11 +61,6 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 
 ## Evaluation Plan
 
-<!-- List your 5 test questions with their expected correct answers.
-     Questions should be specific enough that you can judge whether the system's response
-     is right or wrong. "What are good dining halls?" is too vague.
-     "What do students say about wait times at [dining hall name] during lunch?" is testable. -->
-
 | # | Question | Expected answer |
 |---|----------|-----------------|
 | 1 | What concerns do residents raise about management at Sentry Tempe? | Residents describe poor communication, ignored complaints, slow responses, unresolved maintenance requests, and a lack of urgency in addressing resident concerns. |
@@ -93,10 +73,6 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 
 ## Anticipated Challenges
 
-<!-- What could go wrong? Name at least two specific risks with reasoning.
-     Consider: noisy or inconsistent documents, missing source attribution, off-topic
-     retrieval, chunks that split key information across boundaries. -->
-
 1. **Challenge 1: Conflicting Opinions** - Apartment reviews and Reddit discussions are highly subjective. One resident may describe an apartment as quiet and safe, while another may describe the same apartment as noisy and unsafe. This could make it difficult for the system to provide a clear answer when the retrieved chunks contain conflicting experiences from different residents.
 
 
@@ -105,12 +81,6 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 ---
 
 ## Architecture
-
-<!-- Draw a diagram of your pipeline showing the five stages:
-     Document Ingestion → Chunking → Embedding + Vector Store → Retrieval → Generation
-     Label each stage with the tool or library you're using.
-     You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
-     You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
 ![RAG Pipeline Architecture](assets/rag_pipeline_architecture.png)
 
@@ -126,16 +96,6 @@ For this project, I will use all-MiniLM-L6-v2 because it is free, runs locally, 
 ---
 
 ## AI Tool Plan
-
-<!-- For each part of the pipeline below, describe:
-     - Which AI tool you plan to use (Claude, Copilot, ChatGPT, etc.)
-     - What you'll give it as input (which sections of this planning.md, which requirements)
-     - What you expect it to produce
-     - How you'll verify the output matches your spec
-
-     "I'll use AI to help me code" is not a plan.
-     "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
-     with my specified chunk size and overlap" is a plan. -->
 
 **Milestone 3 — Ingestion and chunking:**
 
